@@ -1,0 +1,26 @@
+{
+  "name": "cumulus",
+  "version": "1.0.0",
+  "description": "word cloud generator that interfaces with nightbot",
+  "main": "cumulus.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d526f861/Cumulus.git"
+  },
+  "author": "David Freeman and Caullen Sasnett",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/d526f861/Cumulus/issues"
+  },
+  "homepage": "https://github.com/d526f861/Cumulus#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.1",
+    "express": "^4.15.3",
+    "fs": "0.0.1-security",
+    "request": "^2.81.0",
+    "tmi.js": "^1.2.1"
+  }
+}
