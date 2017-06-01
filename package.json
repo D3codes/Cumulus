@@ -17,13 +17,11 @@
   },
   "homepage": "https://github.com/d526f861/Cumulus#readme",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.1",
     "express": "^4.15.3",
     "fs": "0.0.1-security",
-    "jquerygo": "0.0.16",
-    "phantomjs": "^2.1.7",
+    "imgur": "^0.2.1",
     "request": "^2.81.0",
-    "selenium-webdriver": "^3.4.0",
+    "svg2png": "^4.1.1",
     "tmi.js": "^1.2.1",
     "webpage": "^0.3.0"
   }

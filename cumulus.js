@@ -1,8 +1,17 @@
 var tmi = require('tmi.js')
 var request = require('request')
-var fs = require('fs')
-var cheerio = require('cheerio')
+var fs = require('pn/fs')
 var url = require('url')
+var webdriver = require('selenium-webdriver'),
+    By = webdriver.By,
+    until = webdriver.until
+var imgur = require('imgur')
+var svg2png = require("svg2png");
+
+var config = JSON.parse(fs.readFileSync('config.json'))
+var CHANNEL = config.channel
+var RUN_SILENTLY = (config.runSilently == 'true')
+var PASSWORD = config.password
 
 var words = {}
 var isRunning = false
@@ -15,25 +24,31 @@ var options = {
   },
   identity: {
     username: 'iota_bot',
-    password: JSON.parse(fs.readFileSync('config.json')).password,
+    password: PASSWORD,
   },
-  channels: ['amoney_tv']
+  channels: [CHANNEL]
 }
 client = new tmi.client(options)
 client.connect()
 
 client.on('chat', (channel, user, message, self) => {
   if(self) return
-  if(user.mod && message.toLowerCase() == "!cumulus start" && !isRunning) {
+  if((user.mod || user.username == 'greasyw00t') && message.toLowerCase() == "!cumulus start" && !isRunning) {
     isRunning = true
-    client.say("Cumulus Started")
-  } else if(user.mod && message.toLowerCase() == "!cumulus stop" && isRunning) {
+    words = {}
+    if(!RUN_SILENTLY) client.say('#'+CHANNEL, "Cumulus Started")
+  } else if((user.mod || user.username == 'greasyw00t') && message.toLowerCase() == "!cumulus stop" && isRunning) {
+    if(!RUN_SILENTLY) client.say('#'+CHANNEL, 'Creating word cloud for this stream')
     isRunning = false
-    createCloud()
-  }
-
-  if(isRunning) {
-    message = message.toLowerCase()
+    createCloud(() => {
+      uploadToImgur((cloud) => {
+        if(!RUN_SILENTLY) client.say('#'+CHANNEL, 'Word cloud for this stream: ' +cloud)
+        fs.unlinkSync('../../../../../Downloads/wordcloud.svg')
+        fs.unlinkSync('dest.png')
+      })
+    })
+  } else if(isRunning) {
+    message = message.toUpperCase()
                     .replace(/[.,\/#!$%\^&\*;?+@:{}=\-_`~()]/g,"")
                     .replace(/\s{2,}/g," ")
     var message_parts = message.split(' ')
@@ -47,7 +62,7 @@ client.on('chat', (channel, user, message, self) => {
   }
 })
 
-function createCloud() {
+function createCloud(callback) {
   var keys = Object.keys(words)
   var cloud = ""
   keys.forEach((word) => {
@@ -57,10 +72,38 @@ function createCloud() {
     cloud += '\n'
   })
 
-  url = 'http://www.wordclouds.com/'
-  request(url, (error, response, html) => {
-    var $ = cheerio.load(html)
+  var driver = new webdriver.Builder()
+      .forBrowser('safari')
+      .build();
 
-    $('.btn btn-default dropdown-toggle').click()
-  })
+  driver.get('https://www.jasondavies.com/wordcloud/');
+  driver.sleep(1000)
+  var inputField = driver.findElement(By.id('text'))
+  //inputField.clear()
+  //driver.findElement(By.id('text')).sendKeys(cloud);
+  driver.executeScript("arguments[0].value = arguments[1]", inputField, cloud)
+  driver.findElement(By.id('go')).click();
+  driver.sleep(3000)
+  driver.findElement(By.id('download-svg')).click();
+  driver.sleep(3000)
+  driver.quit()
+
+  setTimeout(() => {
+    fs.readFile('../../../../../Downloads/wordcloud.svg')
+        .then(svg2png)
+        .then(buffer => fs.writeFile("dest.png", buffer))
+        .catch(e => console.error(e))
+
+        setTimeout(callback, 6000)
+  }, 13000)
+}
+
+function uploadToImgur(callback) {
+  imgur.uploadFile('dest.png')
+    .then(function (json) {
+        callback(json.data.link)
+    })
+    .catch(function (err) {
+        callback(err.message)
+    })
 }
