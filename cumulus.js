@@ -11,7 +11,6 @@ var svg2png = require("svg2png");
 var config = JSON.parse(fs.readFileSync('config.json'))
 var CHANNEL = config.channel
 var RUN_SILENTLY = (config.runSilently == 'true')
-var PASSWORD = config.password
 
 var words = {}
 var isRunning = false
@@ -23,8 +22,8 @@ var options = {
     reconnect: true
   },
   identity: {
-    username: 'iota_bot',
-    password: PASSWORD,
+    username: config.username,
+    password: config.passwords,
   },
   channels: [CHANNEL]
 }
