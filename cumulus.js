@@ -23,7 +23,7 @@ var options = {
   },
   identity: {
     username: config.username,
-    password: config.passwords,
+    password: config.password,
   },
   channels: [CHANNEL]
 }
