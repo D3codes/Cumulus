@@ -7,6 +7,6 @@ Configuration
 -------------
 
 * Clone or download this repository
-* Fill in require fields in "example_config.json" and rename to "config.json"
+* Fill in required fields in "example_config.json" and rename to "config.json"
 * Run **npm install**
 * Run **node cumulus.js**
