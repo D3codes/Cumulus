@@ -10,7 +10,9 @@ var svg2png = require("svg2png");
 
 var config = JSON.parse(fs.readFileSync('config.json'))
 var CHANNEL = config.channel
-var RUN_SILENTLY = (config.runSilently == 'true')
+var RUN_SILENTLY = (config.runSilently.toLowerCase() == 'true')
+var PATH_TO_DOWNLOADS = config.pathToDownloads
+var ADMIN = config.admin
 
 var words = {}
 var isRunning = false
@@ -32,18 +34,20 @@ client.connect()
 
 client.on('chat', (channel, user, message, self) => {
   if(self) return
-  if(user.mod && message.toLowerCase() == "!cumulus start" && !isRunning) {
+  if((user.mod || user.username == ADMIN) && message.toLowerCase() == "!cumulus start" && !isRunning) {
     isRunning = true
     words = {}
     if(!RUN_SILENTLY) client.say('#'+CHANNEL, "Cumulus Started")
-  } else if(user.mod && message.toLowerCase() == "!cumulus stop" && isRunning) {
+  } else if((user.mod || user.username == ADMIN) && message.toLowerCase() == "!cumulus stop" && isRunning) {
     if(!RUN_SILENTLY) client.say('#'+CHANNEL, 'Creating word cloud for this stream')
     isRunning = false
     createCloud(() => {
       uploadToImgur((cloud) => {
+        console.log('====================================')
         console.log('Cloud url: ' + cloud)
+        console.log('====================================')
         if(!RUN_SILENTLY) client.say('#'+CHANNEL, 'Word cloud for this stream: ' +cloud)
-        fs.unlinkSync('../../../../../Downloads/wordcloud.svg')
+        fs.unlinkSync(PATH_TO_DOWNLOADS + '/wordcloud.svg')
         fs.unlinkSync('dest.png')
       })
     })
@@ -77,7 +81,7 @@ function createCloud(callback) {
       .build();
 
   driver.get('https://www.jasondavies.com/wordcloud/');
-  driver.sleep(1000)
+  driver.sleep(3000)
   var inputField = driver.findElement(By.id('text'))
   driver.executeScript("arguments[0].value = arguments[1]", inputField, cloud)
   driver.findElement(By.id('go')).click();
@@ -87,13 +91,13 @@ function createCloud(callback) {
   driver.quit()
 
   setTimeout(() => {
-    fs.readFile('../../../../../Downloads/wordcloud.svg')
+    fs.readFile(PATH_TO_DOWNLOADS + '/wordcloud.svg')
         .then(svg2png)
         .then(buffer => fs.writeFile("dest.png", buffer))
         .catch(e => console.error(e))
 
-        setTimeout(callback, 6000)
-  }, 13000)
+        setTimeout(callback, 10000)
+  }, 22000)
 }
 
 function uploadToImgur(callback) {

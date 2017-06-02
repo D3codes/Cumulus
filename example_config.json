@@ -1,6 +1,9 @@
 {
   "username": "BOT USERNAME HERE",
   "password": "BOT PASSWORD HERE",
-  "channel": "YOUR CHANNEL HERE",
-  "runSilently": "false"
+  "channel": "TWITCH CHANNEL FOR BOT TO MONITOR HERE",
+  "runSilently": "true",
+  "pathToDownloads": "PATH TO DOWNLOADS FOLDER HERE",
+  "admin": "YOUR TWITCH USERNAME HERE",
+  "saveImages": "true"
 }
