@@ -32,15 +32,16 @@ client.connect()
 
 client.on('chat', (channel, user, message, self) => {
   if(self) return
-  if((user.mod || user.username == 'greasyw00t') && message.toLowerCase() == "!cumulus start" && !isRunning) {
+  if(user.mod && message.toLowerCase() == "!cumulus start" && !isRunning) {
     isRunning = true
     words = {}
     if(!RUN_SILENTLY) client.say('#'+CHANNEL, "Cumulus Started")
-  } else if((user.mod || user.username == 'greasyw00t') && message.toLowerCase() == "!cumulus stop" && isRunning) {
+  } else if(user.mod && message.toLowerCase() == "!cumulus stop" && isRunning) {
     if(!RUN_SILENTLY) client.say('#'+CHANNEL, 'Creating word cloud for this stream')
     isRunning = false
     createCloud(() => {
       uploadToImgur((cloud) => {
+        console.log('Cloud url: ' + cloud)
         if(!RUN_SILENTLY) client.say('#'+CHANNEL, 'Word cloud for this stream: ' +cloud)
         fs.unlinkSync('../../../../../Downloads/wordcloud.svg')
         fs.unlinkSync('dest.png')
@@ -78,8 +79,6 @@ function createCloud(callback) {
   driver.get('https://www.jasondavies.com/wordcloud/');
   driver.sleep(1000)
   var inputField = driver.findElement(By.id('text'))
-  //inputField.clear()
-  //driver.findElement(By.id('text')).sendKeys(cloud);
   driver.executeScript("arguments[0].value = arguments[1]", inputField, cloud)
   driver.findElement(By.id('go')).click();
   driver.sleep(3000)
