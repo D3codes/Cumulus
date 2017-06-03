@@ -39,8 +39,14 @@ client.on('chat', (channel, user, message, self) => {
   if((user.mod || user.username == ADMIN) && message.toLowerCase() == "!cumulus start" && !isRunning) {
     isRunning = true
     words = {}
+    console.log('====================================')
+    console.log('Cumulus Started')
+    console.log('====================================')
     if(!RUN_SILENTLY) client.say('#'+CHANNEL, "Cumulus Started")
   } else if((user.mod || user.username == ADMIN) && message.toLowerCase() == "!cumulus stop" && isRunning) {
+    console.log('====================================')
+    console.log('Cumulus Stopped')
+    console.log('====================================')
     if(!RUN_SILENTLY) client.say('#'+CHANNEL, 'Creating word cloud for this stream')
     isRunning = false
     var seconds = new Date() / 1000
