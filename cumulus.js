@@ -13,7 +13,9 @@ var CHANNEL = config.channel
 var RUN_SILENTLY = (config.runSilently.toLowerCase() == 'true')
 var PATH_TO_DOWNLOADS = config.pathToDownloads
 var ADMIN = config.admin
+var SAVE_IMAGES = (config.saveImages.toLowerCase() == 'true')
 
+var imageName = ""
 var words = {}
 var isRunning = false
 var options = {
@@ -41,6 +43,8 @@ client.on('chat', (channel, user, message, self) => {
   } else if((user.mod || user.username == ADMIN) && message.toLowerCase() == "!cumulus stop" && isRunning) {
     if(!RUN_SILENTLY) client.say('#'+CHANNEL, 'Creating word cloud for this stream')
     isRunning = false
+    var seconds = new Date() / 1000
+    imageName = CHANNEL + " - " + seconds + ".png"
     createCloud(() => {
       uploadToImgur((cloud) => {
         console.log('====================================')
@@ -48,7 +52,7 @@ client.on('chat', (channel, user, message, self) => {
         console.log('====================================')
         if(!RUN_SILENTLY) client.say('#'+CHANNEL, 'Word cloud for this stream: ' +cloud)
         fs.unlinkSync(PATH_TO_DOWNLOADS + '/wordcloud.svg')
-        fs.unlinkSync('dest.png')
+        if(!SAVE_IMAGES) fs.unlinkSync(imageName)
       })
     })
   } else if(isRunning) {
@@ -93,7 +97,7 @@ function createCloud(callback) {
   setTimeout(() => {
     fs.readFile(PATH_TO_DOWNLOADS + '/wordcloud.svg')
         .then(svg2png)
-        .then(buffer => fs.writeFile("dest.png", buffer))
+        .then(buffer => fs.writeFile(imageName, buffer))
         .catch(e => console.error(e))
 
         setTimeout(callback, 10000)
@@ -101,7 +105,7 @@ function createCloud(callback) {
 }
 
 function uploadToImgur(callback) {
-  imgur.uploadFile('dest.png')
+  imgur.uploadFile(imageName)
     .then(function (json) {
         callback(json.data.link)
     })
